@@ -10,16 +10,20 @@ If an indexer returns poorly formatted titles but provides correct metadata in `
 
 ## The Problem
 
+Indexer returns this title:
 ```
-# Indexer returns this title:
 Example-Company GmbH-Cybercast-Episode 19: Securing an Austrian Silicon Fab-FLAC-2017
+```
 
-# Lidarr tries to parse:
+Lidarr tries to parse:
+```
 ParsingService|Trying inexact company match for "Example"
 ParsingService|No matching company "Example"
+```
 → Release is rejected!
 
-# But the newznab:attr contain all the correct info:
+But the newznab:attr contain all the correct info:
+```
 <newznab:attr name="artist" value="Tatjana Schaumberger"/>
 <newznab:attr name="album" value="Cybercast"/>
 <newznab:attr name="track" value="Episode 19: Securing an Austrian Silicon Fab"/>
