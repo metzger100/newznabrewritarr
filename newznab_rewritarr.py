@@ -190,11 +190,21 @@ def detect_book_format_from_title(title: str) -> str | None:
 def sanitize_field(value: str) -> str:
     """
     Sanitize a field value for use in a rewritten title.
-    Replaces internal hyphens surrounded by text with ' ' to avoid
-    confusing *arr parsers that split on '-'.
+    Replaces internal hyphens within a token (e.g. "Street-Legal" -> "Street Legal")
+    to avoid confusing *arr parsers that split on '-'.
     """
-    # Collapse multiple spaces
-    value = re.sub(r'\s+', ' ', value).strip()
+    if not value:
+        return ""
+
+    # Normalize whitespace
+    value = re.sub(r"\s+", " ", value).strip()
+
+    # Replace hyphens/dashes that are BETWEEN word characters (letters/digits/_)
+    # Examples: "Street-Legal" -> "Street Legal", "AC-DC" -> "AC DC"
+    value = re.sub(r"(?<=\w)[-–—](?=\w)", " ", value)
+
+    # Collapse whitespace again in case replacements introduced doubles
+    value = re.sub(r"\s+", " ", value).strip()
     return value
 
 
