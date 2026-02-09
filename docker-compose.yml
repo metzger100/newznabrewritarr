@@ -1,0 +1,80 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# NewznabRewritarr - Docker Compose
+#
+# Request flow:
+#   Prowlarr → NewznabRewritarr (proxy :5008) → UmlautAdaptarr (proxy :5006) → Indexer
+#   Response flow back rewrites titles using newznab:attr metadata.
+#
+# Setup in Prowlarr:
+#   1. Settings → Indexers → Add "HTTP Proxy"
+#      - Name: NewznabRewritarr
+#      - Host: newznab-rewritarr
+#      - Port: 5008
+#      - Tag: newznab-rewritarr
+#   2. On each indexer: add tag "newznab-rewritarr", set URL to http://
+#
+# If you also use UmlautAdaptarr:
+#   Set UPSTREAM_PROXY=umlautadaptarr:5006 (already set below).
+#   This chains both proxies automatically. You only need the
+#   "newznab-rewritarr" tag in Prowlarr — NOT the umlautadaptarr tag.
+# ──────────────────────────────────────────────────────────────────────────────
+
+version: '3.8'
+
+services:
+  newznab-rewritarr:
+    build: .
+    # image: newznab-rewritarr  # uncomment after publishing to a registry
+    container_name: newznab-rewritarr
+    restart: unless-stopped
+    ports:
+      - "5008:5008"
+    environment:
+      - TZ=Europe/Berlin
+
+      # ── Proxy Port ──
+      - PROXY_PORT=5008
+
+      # ── Upstream Proxy (UmlautAdaptarr) ──
+      # Set this to chain through UmlautAdaptarr. Leave empty for direct.
+      - UPSTREAM_PROXY=umlautadaptarr:5006
+
+      # ── Feature Toggles ──
+      - REWRITE_MUSIC=true       # Rewrite audio/music titles (Lidarr)
+      - REWRITE_BOOKS=true       # Rewrite book/ebook titles (Readarr)
+      - REWRITE_AUDIOBOOKS=true  # Rewrite audiobook titles (Readarr)
+
+      # ── Advanced ──
+      - BEST_EFFORT=true         # Rewrite even with partial attrs
+      - DEBUG_ATTRS=false        # Add original_title attr for debugging
+      - LOG_LEVEL=INFO           # DEBUG, INFO, WARNING, ERROR
+    networks:
+      - arr-network
+
+  # ── Reference: Your existing UmlautAdaptarr ──
+  # (Uncomment if you don't already have it running)
+  #
+  # umlautadaptarr:
+  #   build: https://github.com/PCJones/UmlautAdaptarr.git#master
+  #   image: umlautadaptarr
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5005:5005"
+  #     - "5006:5006"
+  #   environment:
+  #     - TZ=Europe/Berlin
+  #     - SONARR__ENABLED=false
+  #     - SONARR__HOST=http://sonarr:8989
+  #     - SONARR__APIKEY=YOUR_SONARR_API_KEY
+  #     - LIDARR__ENABLED=true
+  #     - LIDARR__HOST=http://lidarr:8686
+  #     - LIDARR__APIKEY=YOUR_LIDARR_API_KEY
+  #     - READARR__ENABLED=true
+  #     - READARR__HOST=http://readarr:8787
+  #     - READARR__APIKEY=YOUR_READARR_API_KEY
+  #   networks:
+  #     - arr-network
+
+networks:
+  arr-network:
+    external: true  # Use your existing arr network, or set to 'false' to create
