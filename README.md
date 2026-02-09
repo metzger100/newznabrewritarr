@@ -4,7 +4,9 @@
 
 **NewznabRewritarr** solves the problem that Lidarr and Readarr only parse the `<title>` field from Newznab API responses and completely ignore the `newznab:attr` metadata (artist, album, author, booktitle, track, …).
 
-If an indexer returns poorly formatted titles but provides correct metadata in `newznab:attr` attributes, NewznabRewritarr rebuilds the title from those attributes so the *arr apps can parse it correctly.
+If an indexer returns poorly formatted titles but provides correct metadata in `newznab:attr` attributes, NewznabRewritarr rebuilds the title from those attributes so the *arr apps can parse it correctly. This is not a clean solution.
+
+For Example in the case the quality is not available in the title or audio `newznab:attr` it puts WEB or FLAC in the Title based on the `newznab:attr` [category](https://inhies.github.io/Newznab-API/categories/). It is not guaranteed that the the quality is good. But at least you know if it is a LOSSLESS or a LOSSY Audio.
 
 ---
 
